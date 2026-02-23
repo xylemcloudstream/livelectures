@@ -375,6 +375,7 @@ function sendWave(){
   if(navigator.vibrate) navigator.vibrate([60,40,60]);
 }
 function showWaveToast(from){
+  console.log("Waved");
   const toast=document.getElementById('waveToast');
   const label=document.getElementById('waveFrom');
   const tag=from==='sender'?'📳 Sender waved!':'📱 Receiver waved!';
