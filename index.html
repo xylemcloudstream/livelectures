@@ -120,10 +120,36 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .v-wave-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #f48fb1;}
 
 /* wave toast popup */
-#waveToast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:10001;font-size:clamp(60px,20vw,100px);pointer-events:none;transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;opacity:0;}
-#waveToast.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
-#waveToast.hide{transform:translate(-50%,-50%) scale(0.5);opacity:0;}
-#waveFrom{position:fixed;top:calc(50% + clamp(46px,13vw,66px));left:50%;transform:translateX(-50%);z-index:10001;font-size:13px;font-weight:700;color:#c0396b;background:#fff5f9;padding:4px 12px;border-radius:20px;border:1.5px solid #ffb3d1;pointer-events:none;opacity:0;transition:opacity 0.3s;}
+#waveToast{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.4);
+  z-index:19999;
+  font-size:clamp(60px,20vw,100px);
+  pointer-events:none;
+  opacity:0;
+  transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+}
+#waveToast.show{
+  transform:translate(-50%,-50%) scale(1);
+  opacity:1;
+}
+#waveFrom{
+  position:fixed;
+  top:calc(50% + clamp(50px,14vw,70px));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:19999;
+  font-size:13px;font-weight:700;
+  color:#c0396b;
+  background:#fff5f9;
+  padding:4px 14px;
+  border-radius:20px;
+  border:1.5px solid #ffb3d1;
+  pointer-events:none;
+  white-space:nowrap;
+  opacity:0;
+  transition:opacity 0.2s;
+}
 #waveFrom.show{opacity:1;}
 </style>
 </head>
@@ -225,12 +251,12 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     <!-- buzz slider -->
     <div class="v-ctrl-row">
       <div class="v-ctrl-label">Buzz duration <span id="buzzVal">200ms</span></div>
-      <input type="range" id="buzzSlider" min="50" max="800" value="200" oninput="updateSlider(this,'buzzVal','ms')">
+      <input type="range" id="buzzSlider" min="50" max="1000" value="200" oninput="updateSlider(this,'buzzVal','ms')">
     </div>
     <!-- pause slider -->
     <div class="v-ctrl-row">
       <div class="v-ctrl-label">Pause duration <span id="pauseVal">100ms</span></div>
-      <input type="range" id="pauseSlider" min="30" max="600" value="100" oninput="updateSlider(this,'pauseVal','ms')">
+      <input type="range" id="pauseSlider" min="0" max="600" value="100" oninput="updateSlider(this,'pauseVal','ms')">
     </div>
     <!-- continuous toggle + wave -->
     <div class="v-action-row">
@@ -334,7 +360,7 @@ function startContinuous(){
     ws.send(JSON.stringify({type:'vibrate',pattern:[b,p]}));
   };
   fire();
-  continuousInterval=setInterval(fire, getBuzz()+getPause()+10);
+  continuousInterval=setInterval(fire, Math.max(getBuzz()+getPause()+10, 100));
 }
 function stopContinuous(){
   if(continuousInterval){clearInterval(continuousInterval);continuousInterval=null;}
@@ -353,9 +379,13 @@ function showWaveToast(from){
   const label=document.getElementById('waveFrom');
   const tag=from==='sender'?'📳 Sender waved!':'📱 Receiver waved!';
   label.innerText=tag;
+  // reset first in case a previous toast is still showing
+  toast.className=''; label.className='';
+  // force reflow so transition fires fresh
+  void toast.offsetWidth;
   toast.className='show'; label.className='show';
   if(navigator.vibrate) navigator.vibrate([60,40,60]);
-  setTimeout(()=>{toast.className='hide';label.className='';},1800);
+  setTimeout(()=>{toast.className='';label.className='';},2000);
 }
 
 // VIBRUCHU CORE
